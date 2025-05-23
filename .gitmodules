@@ -1,0 +1,3 @@
+[submodule "obv_lexer"]
+	path = obv_lexer
+	url = git@github.com:0bVdnt/obv_lexer.git
