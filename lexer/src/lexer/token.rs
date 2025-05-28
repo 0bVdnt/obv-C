@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub enum Token {
     // Keywords
     KwInt,
@@ -9,7 +9,7 @@ pub enum Token {
 
     // Identifiers (ex. main, foo, bar, return)
     Identifier(String),
-    
+
     // Constant (Holds 32-bit integer values)
     Constant(i32),
 

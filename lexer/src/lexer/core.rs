@@ -1,7 +1,7 @@
-use regex::Regex;
-use lazy_static::lazy_static;
-use super::token::Token;
 use super::error::LexerError;
+use super::token::Token;
+use lazy_static::lazy_static;
+use regex::Regex;
 
 lazy_static! {
     static ref IDENTIFIER_RE: Regex = Regex::new(r"\A[a-zA-Z_]\w*\b").unwrap();
@@ -11,7 +11,12 @@ lazy_static! {
     static ref OPEN_BRACE_RE: Regex = Regex::new(r"\A\{").unwrap();
     static ref CLOSE_BRACE_RE: Regex = Regex::new(r"\A\}").unwrap();
     static ref SEMICOLON_RE: Regex = Regex::new(r"\A;").unwrap();
+
+    // For skipping these
     static ref WHITESPACE_RE: Regex = Regex::new(r"\A\s+").unwrap();
+    static ref SINGLE_LINE_COMMENTS_RE: Regex = Regex::new(r"\A//.*").unwrap();
+    static ref MULTI_LINE_COMMENTS_RE: Regex = Regex::new(r"\A(?s)/\*.*?\*/").unwrap();
+    // Does not consider nested multiline comments
 }
 
 const KEYWORDS: [(&str, Token); 3] = [
@@ -20,7 +25,6 @@ const KEYWORDS: [(&str, Token); 3] = [
     ("return", Token::KwReturn),
 ];
 
-// A struct to contain lexer functions
 pub struct Lexer<'a> {
     input: &'a str,
     position: usize,
@@ -28,27 +32,57 @@ pub struct Lexer<'a> {
 
 impl<'a> Lexer<'a> {
     pub fn new(input: &'a str) -> Self {
-        Lexer {input, position: 0}
+        Lexer { input, position: 0 }
     }
 
-    fn skip_whitespaces(&mut self) {
-        let current_slice = &self.input[self.position..];
-        if let Some(mat) = WHITESPACE_RE.find(current_slice) {
-            self.position += mat.end();
+    // Skips whitespaces and comments and return true if skipped any, otherwise false.
+    fn skip_whitespaces_and_comments(&mut self) -> bool {
+        let mut skipped_something = false;
+        loop {
+            let current_slice = &self.input[self.position..];
+            if current_slice.is_empty() {
+                break;
+            }
+            if let Some(mat) = WHITESPACE_RE.find(current_slice) {
+                self.position += mat.end();
+                skipped_something = true;
+                continue;
+            }
+            if let Some(mat) = SINGLE_LINE_COMMENTS_RE.find(current_slice) {
+                self.position += mat.end();
+                skipped_something = true;
+                continue;
+            }
+            if let Some(mat) = MULTI_LINE_COMMENTS_RE.find(current_slice) {
+                // TODO: Add a check for unterminated multiline comment
+                self.position += mat.end();
+                skipped_something = true;
+                continue;
+            }
+            // if nothing was skipped in this iteration break from the loop.
+            break;
         }
+        skipped_something
     }
 
     fn next_token_internal(&mut self) -> Option<Result<Token, LexerError>> {
-        self.skip_whitespaces();
-        if self.position >= self.input.len() {
-            return None;
+        // Loop to skip whitespaces and comments until a token a found or EOF
+        loop {
+            let _ = self.skip_whitespaces_and_comments(); // Results ignored, just ensure
+                                                          // skipping
+            if self.position >= self.input.len() {
+                return None;
+            }
+            // If control reaches here which means that `self.position` points to a
+            // potential start of a token, so the control breaks out of the skipping loop
+            break;
         }
 
         let current_slice = &self.input[self.position..];
         let start_position_of_the_token = self.position;
 
         // Match punctuation
-        
+
         if let Some(mat) = OPEN_PAREN_RE.find(current_slice) {
             self.position += mat.end();
             return Some(Ok(Token::OpenParen));
@@ -100,9 +134,22 @@ impl<'a> Lexer<'a> {
                 }
             }
         }
+        // If there's still input left at `current_slice` and no token matched,
+        // it means there's an unexpected character or sequence.
+        if !current_slice.is_empty() {
+            if let Some(first_char) = current_slice.chars().next() {
+                self.position += first_char.len_utf8();
+                return Some(Err(LexerError::UnexpectedCharacter {
+                    char: first_char,
+                    pos: start_position_of_the_token,
+                }));
+            }
+        }
 
         // In case of no match
-        Some(Err(LexerError::NoMatch { pos: start_position_of_the_token }))
+        Some(Err(LexerError::NoMatch {
+            pos: start_position_of_the_token,
+        }))
     }
 
     pub fn tokenize_all(&mut self) -> Result<Vec<Token>, LexerError> {
