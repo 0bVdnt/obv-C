@@ -9,7 +9,6 @@ use std::{
 
 // Compiler Output Structure
 #[derive(Serialize)]
-#[serde(untagged)]
 enum CompilerOutput {
     Success(Vec<Token>),
     Error(LexerError),
