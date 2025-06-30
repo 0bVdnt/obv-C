@@ -1,32 +1,22 @@
-image: gitpod/workspace-full
+image: ocaml/opam:ubuntu-ocaml-5.1
 tasks:
   - name: Setup Compiler Environment
     init: |
-      echo "--- Ensuring OPAM and OCaml are set up ---"
-      # This checks if opam is available. If not, it installs it.
-      if ! command -v opam &> /dev/null
-      then
-          echo "opam not found. Installing opam via apt..."
-          sudo apt-get update && sudo apt-get install -y opam
-      fi
+      echo "--- Setting up OPAM environment (should be fast) ---"
+      # Initialize opam. It will detect the pre-installed OCaml 5.1 compiler from the Docker image.
+      # The '--disable-sandboxing' flag is often needed in containerized environments.
+      opam init -y --disable-sandboxing --auto-setup
 
-      # Initialize opam if needed. This command is compatible with older versions.
-      # It sets up the ~/.opam directory.
-      opam init --disable-sandboxing --auto-setup -y || true
+      # --- CRITICAL: Source the OPAM environment to add dune and other tools to PATH ---
+      eval "$(opam env)"
 
-      # Create or switch to the desired OCaml compiler version.
-      opam switch create 5.1.0 || true
-
-      eval "$(opam env --shell bash)"
+      echo "--- Installing OCaml Dependencies ---"
+      # Install dune and yojson for the current opam switch.
       opam install dune yojson -y
-
-      cd obvcc-toolchain
-      echo "Installing OCaml dependencies..."
-      opam install dune yojson unix -y # Add `unix` explicitly as it's used in main.ml
 
       echo "--- Starting Project Build ---"
       echo "Building Rust lexer..."
-      cd ../obvcc-lexer # Navigate to the lexer repo
+      cd obvcc-lexer # Navigate to the lexer repo
       cargo build --release # Build the lexer in release mode for performance
       cd ../obvcc-toolchain # Navigate back to the parser repo
 
