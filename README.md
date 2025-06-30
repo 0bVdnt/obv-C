@@ -11,7 +11,7 @@ A lexer, parser, assembly generator and a code emitter for a multi-language, mul
 [![Cargo](https://img.shields.io/badge/Cargo-crates.io-orange?logo=rust)](https://crates.io/)
 [![Linux](https://img.shields.io/badge/Linux-supported-success?logo=linux)](https://kernel.org/)
 [![macOS](https://img.shields.io/badge/macOS-compatible-lightgrey?logo=apple)](https://www.apple.com/macos/)
-
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/0bVdnt/obvcc.git)
 
 This project demonstrates tokenization of a c program, parsing of tokens, assembly generation and x64 assembly code emission, which is a part of a full compiler pipeline, starting from a C source file and ending with a runnable assembly file. It is composed of two main repositories working in concert:
 

@@ -1,0 +1,30 @@
+image: gitpod/workspace-full
+tasks:
+  - name: Setup Compiler Environment
+    init: |
+      # Clone the repository
+      git clone https://github.com/0bVdnt/obvcc.git
+      cd obvcc-toolchain
+
+      echo "Installing OCaml dependencies..."
+      opam install dune yojson unix -y # Add `unix` explicitly as it's used in main.ml
+
+      echo "Building Rust lexer..."
+      cd ../obvcc-lexer # Navigate to the lexer repo
+      cargo build --release # Build the lexer in release mode for performance
+      cd ../obvcc-toolchain # Navigate back to the parser repo
+
+      echo "Building OCaml compiler..."
+      dune build # Build the OCaml compiler
+
+      echo "Environment setup complete!"
+      echo "You can now run a demo by typing: dune exec -- ./bin/main.exe test.json"
+      echo "Or generate a test.json first: ../obv_lexer/target/release/obv_lexer test.c > test.json"
+    command: |
+      # This command runs after `init`. It can be used to open a file or run a demo.
+      # Create a simple test.c file for immediate testing.
+      echo 'int main(void) { return 1879; }' > test.c
+      # Run the lexer to produce test.json for the demo.
+      ../obv_lexer/target/release/obv_lexer test.c > test.json
+      # Run the OCaml compiler on the generated JSON.
+      dune exec -- ./bin/main.exe test.json
