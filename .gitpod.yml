@@ -2,10 +2,36 @@ image: gitpod/workspace-full
 tasks:
   - name: Setup Compiler Environment
     init: |
+      echo "--- Ensuring OPAM and OCaml are set up ---"
+      # Try to make opam executable available if it's not in PATH by default.
+      export PATH="$HOME/.opam/default/bin:$PATH"
+
+      # Verify opam installation. If 'which opam' fails, install it.
+      if ! command -v opam &> /dev/null
+      then
+          echo "opam not found. Installing opam..."
+          sudo apt-get update && sudo apt-get install -y opam
+          if ! command -v opam &> /dev/null
+          then
+              echo "Error: opam installation failed. Cannot proceed."
+              exit 1
+          fi
+      fi
+
+      # Initialize opam if not already initialized. This creates the ~/.opam directory and default switch.
+      # `opam init` also prints the `eval "$(opam env)"` line needed next.
+      # `--disable-sandboxing` can sometimes be needed in containerized environments.
+      opam init --bare --reinstall-ocaml-compilers --disable-sandboxing --auto-setup -y || true
+      # Ensure the default compiler switch is installed and set up (e.g., OCaml 5.1.0)
+      opam switch create 5.1.0 || true # Use your desired OCaml version
+
+      # Source the OPAM environment to add dune and other tools to PATH 
+      eval "$(opam env --shell bash)" || true
       cd obvcc-toolchain
       echo "Installing OCaml dependencies..."
       opam install dune yojson unix -y # Add `unix` explicitly as it's used in main.ml
 
+      echo "--- Starting Project Build ---"
       echo "Building Rust lexer..."
       cd ../obvcc-lexer # Navigate to the lexer repo
       cargo build --release # Build the lexer in release mode for performance
@@ -25,3 +51,9 @@ tasks:
       ../obvcc-lexer/target/release/obvcc-lexer test.c > test.json
       # Run the OCaml compiler on the generated JSON.
       dune exec -- ./bin/main.exe test.json
+vscode:
+  extensions:
+    - OCamlPlatform.ocaml-platform
+    - rust-lang.rust-analyzer
+    - ms-vscode.cpptools-extensionPack
+    - jebbs.markdown-mermaid
