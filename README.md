@@ -1,17 +1,19 @@
 # obvcc
 
 ### The obvious minimal C compiler.
-
 A lexer, parser, assembly generator and a code emitter for a multi-language, multi-stage compiler that transforms a minimal C-like language into platform-aware x64 assembly.
 
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![OCaml](https://img.shields.io/badge/OCaml-functional-blueviolet?logo=ocaml)](https://ocaml.org/)
-[![Rust](https://img.shields.io/badge/Rust-stable-orange?logo=rust)](https://www.rust-lang.org/)
-[![Dune](https://img.shields.io/badge/Dune-build_tool-9cf?logo=ocaml)](https://dune.build/)
-[![Cargo](https://img.shields.io/badge/Cargo-crates.io-orange?logo=rust)](https://crates.io/)
-[![Linux](https://img.shields.io/badge/Linux-supported-success?logo=linux)](https://kernel.org/)
-[![macOS](https://img.shields.io/badge/macOS-compatible-lightgrey?logo=apple)](https://www.apple.com/macos/)
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/0bVdnt/obvcc.git)
+[![Rust](https://img.shields.io/badge/Rust-Lexer-orange?logo=rust)](https://www.rust-lang.org/)
+[![Cargo](https://img.shields.io/badge/Cargo-Package_Manager-orange?logo=rust)](https://crates.io/)
+[![OCaml](https://img.shields.io/badge/OCaml-Parser_Toolchain-9cf?logo=ocaml)](https://ocaml.org/)
+[![Dune](https://img.shields.io/badge/Dune-Build_Tool-9cf?logo=ocaml)](https://dune.build/)
+[![Linux](https://img.shields.io/badge/Linux-Supported-success?logo=linux)](https://kernel.org/)
+[![macOS](https://img.shields.io/badge/macOS-Supported-success?logo=apple)](https://www.apple.com/macos/)
+
+### Run on Gitpod 
+[![Gitpod](https://img.shields.io/badge/Gitpod-Ready%20to%20Run-blue?logo=gitpod)](https://gitpod.io/#https://github.com/0bVdnt/obvcc.git)
 
 This project demonstrates tokenization of a c program, parsing of tokens, assembly generation and x64 assembly code emission, which is a part of a full compiler pipeline, starting from a C source file and ending with a runnable assembly file. It is composed of two main repositories working in concert:
 
@@ -265,6 +267,9 @@ obvcc/
 ---
 
 ## Getting Started
+### Run the project on [Gitpod](https://gitpod.io/#https://github.com/0bVdnt/obvcc.git) with instant setup:
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/0bVdnt/obvcc.git)
 
 ### Prerequisites
 
