@@ -1,5 +1,0 @@
-(executable
- (name main) ; This sets the filename of the output executable
- (libraries yojson obv_parser.lib) ; This declares the dependencies FOR THIS EXECUTABLE.
-)
-

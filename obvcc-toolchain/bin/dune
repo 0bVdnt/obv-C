@@ -1,0 +1,5 @@
+(executable
+ (name main) ; This sets the filename of the output executable
+ (libraries yojson obvcc_toolchain.lib unix) ; This declares the dependencies FOR THIS EXECUTABLE.
+)
+

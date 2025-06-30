@@ -1,0 +1,17 @@
+{
+  "Success": [
+    "KwInt",
+    {
+      "Identifier": "main"
+    },
+    "OpenParen",
+    "CloseParen",
+    "OpenBrace",
+    "KwReturn",
+    {
+      "Constant": 9
+    },
+    "Semicolon",
+    "CloseBrace"
+  ]
+}

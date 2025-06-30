@@ -1,5 +1,5 @@
 opam-version: "2.0"
-synopsis: "A parser for a minimal compiler"
+synopsis: "A c tokens to x64 assembly code emission toolchain for a minimal compiler"
 depends: [
   "ocaml"
   "dune" {>= "3.8"}
