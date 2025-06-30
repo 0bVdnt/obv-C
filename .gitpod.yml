@@ -1,26 +1,34 @@
-image: ocaml/opam:ubuntu-ocaml-5.1
+image: gitpod/workspace-full
 tasks:
   - name: Setup Compiler Environment
     init: |
-      echo "--- Setting up OPAM environment (should be fast) ---"
-      # Initialize opam. It will detect the pre-installed OCaml 5.1 compiler from the Docker image.
-      # The '--disable-sandboxing' flag is often needed in containerized environments.
-      opam init -y --disable-sandboxing --auto-setup
+      echo "--- Ensuring OPAM and OCaml are set up ---"
+      # This checks if opam is available. If not, it installs it.
+      if ! command -v opam &> /dev/null
+      then
+          echo "opam not found. Installing opam via apt..."
+          sudo apt-get update && sudo apt-get install -y opam
+      fi
 
-      # --- CRITICAL: Source the OPAM environment to add dune and other tools to PATH ---
-      eval "$(opam env)"
+      # Initialize opam if needed. This command is compatible with older versions.
+      # It sets up the ~/.opam directory.
+      opam init --disable-sandboxing --auto-setup -y || true
 
-      echo "--- Installing OCaml Dependencies ---"
-      # Install dune and yojson for the current opam switch.
+      # Create or switch to the desired OCaml compiler version.
+      opam switch create 5.1.0 || true
+
+      eval "$(opam env --shell bash)"
+
+      # Installing OCaml Dependencies
       opam install dune yojson -y
 
       echo "--- Starting Project Build ---"
       echo "Building Rust lexer..."
       cd obvcc-lexer # Navigate to the lexer repo
       cargo build --release # Build the lexer in release mode for performance
-      cd ../obvcc-toolchain # Navigate back to the parser repo
 
-      echo "Building OCaml compiler..."
+      cd ../obvcc-toolchain # Navigate back to the toolchain repo
+      echo "Building OCaml toolchain..."
       dune build # Build the OCaml compiler
 
       echo "Environment setup complete!"
@@ -29,8 +37,10 @@ tasks:
     command: |
       # This command runs after `init`. It can be used to open a file or run a demo.
       # Create a simple test.c file for immediate testing.
-      echo 'int main(void) { return 1879; }' > test.c
+      echo 'int main(void) { return 22; }' > test.c
       # Run the lexer to produce test.json for the demo.
       ../obvcc-lexer/target/release/obvcc-lexer test.c > test.json
       # Run the OCaml compiler on the generated JSON.
       dune exec -- ./bin/main.exe test.json
+      # Print the x64 assembly generated
+      cat test.s
